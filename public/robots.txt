@@ -1,0 +1,7 @@
+# Robots.txt for Md. Yasir Omar Fahim Portfolio
+# IMPORTANT: Replace the placeholder domain (https://yasiromarfahim.dev) with your actual production domain when deploying.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://yasiromarfahim.dev/sitemap.xml
