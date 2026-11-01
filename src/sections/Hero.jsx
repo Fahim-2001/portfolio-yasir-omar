@@ -1,233 +1,224 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import React, { useEffect, useRef } from 'react';
+import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { ArrowDown, Download, ChevronRight } from 'lucide-react';
 import { FaGithub, FaLinkedin } from 'react-icons/fa6';
 import portfolioData from '../data/portfolio';
 import { Button } from '../components/Button';
-import { TechCoreCanvas } from '../three/TechCoreCanvas';
+import { Card } from '../components/Card';
+import { OrbitCanvas } from '../three/OrbitCanvas';
+import { useFinePointer, usePrefersReducedMotion } from '../hooks/useMediaQuery';
+
+const SOCIAL_ICONS = { GitHub: FaGithub, LinkedIn: FaLinkedin };
+const EASE = [0.16, 1, 0.3, 1];
+
+const container = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
+};
+
+// "Md. Yasir Omar Fahim" + "Fahim" → ["Md. Yasir Omar", "Fahim"]
+function splitName(name, shortName) {
+  if (shortName && name.endsWith(shortName) && name.length > shortName.length) {
+    return [name.slice(0, -shortName.length).trim(), shortName];
+  }
+  return [null, name];
+}
 
 export function Hero() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const heroRef = useRef(null);
+  const reduced = usePrefersReducedMotion();
+  const fine = useFinePointer();
+  const { profile, experience, highlights } = portfolioData;
+  const [lead, surname] = splitName(profile.name, profile.shortName);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-      setPrefersReducedMotion(media.matches);
-      const listener = (e) => setPrefersReducedMotion(e.matches);
-      media.addEventListener('change', listener);
-      return () => media.removeEventListener('change', listener);
-    }
-  }, []);
-
-  // Dynamically compute current role and company from data file
-  const currentPosition = portfolioData.experience.find(
-    (exp) => exp.end === 'Present'
-  );
+  const currentPosition = experience.find((exp) => exp.end === 'Present');
   const statusLine = currentPosition
-    ? `${portfolioData.profile.role} · Currently at ${currentPosition.company}`
-    : `${portfolioData.profile.role}`;
+    ? `${profile.role} · Currently at ${currentPosition.company}`
+    : profile.role;
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.12,
-        delayChildren: 0.05,
-      },
-    },
-  };
+  // 0 → 1 as the hero scrolls away: drives the stack + surname "explosion"
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: prefersReducedMotion ? 0 : 0.6,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-  };
+  useMotionValueEvent(scrollYProgress, 'change', (value) => {
+    if (reduced) return;
+    heroRef.current?.style.setProperty('--explode', value.toFixed(3));
+  });
+
+  // Pointer parallax for the layered type and the floating code window
+  useEffect(() => {
+    const el = heroRef.current;
+    if (!el || reduced || !fine) return undefined;
+
+    let frame = 0;
+    let nx = 0;
+    let ny = 0;
+    const apply = () => {
+      frame = 0;
+      el.style.setProperty('--px', nx.toFixed(3));
+      el.style.setProperty('--py', ny.toFixed(3));
+    };
+    const onMove = (event) => {
+      if (event.pointerType === 'touch') return;
+      const rect = el.getBoundingClientRect();
+      nx = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      ny = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+    const onLeave = () => {
+      nx = 0;
+      ny = 0;
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    el.addEventListener('pointermove', onMove, { passive: true });
+    el.addEventListener('pointerleave', onLeave, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+    };
+  }, [reduced, fine]);
 
   return (
-    <section
-      id="hero"
-      className="relative min-h-[calc(100vh-4.5rem)] flex flex-col justify-between overflow-hidden bg-grid-pattern pt-4 pb-16 md:pt-0 md:pb-20"
-    >
-      {/* Background ambient gradient subtle falloff (monochrome only) */}
+    <section id="hero" ref={heroRef} className="relative isolate overflow-hidden">
+      {/* Drafting-paper dot grid */}
       <div
-        className="pointer-events-none absolute inset-0 bg-radial from-transparent via-bg/60 to-bg -z-10"
         aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-dot-grid [mask-image:radial-gradient(ellipse_80%_70%_at_45%_35%,#000_25%,transparent_100%)]"
       />
 
-      <div className="max-w-6xl mx-auto px-6 md:px-8 w-full my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-          {/* Left Column: Hero Content */}
-          <motion.div
-            className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left z-10"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {/* Status Line with Pulsing Monochrome Dot */}
+      <div className="relative">
+        <div className="mx-auto max-w-6xl px-5 sm:px-6 md:px-8">
+          <div className="grid grid-cols-1 items-center pt-10 sm:pt-14 lg:min-h-[calc(100svh-12rem)] lg:grid-cols-12 lg:py-16">
             <motion.div
-              variants={itemVariants}
-              className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full border border-border bg-surface text-xs font-mono text-text-muted mb-6 select-none shadow-xs"
+              className="relative z-10 lg:col-span-7"
+              variants={container}
+              initial="hidden"
+              animate="visible"
             >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neutral-400 dark:bg-neutral-500 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-text" />
-              </span>
-              <span>{statusLine}</span>
-            </motion.div>
-
-            {/* Main Headline */}
-            <motion.h1
-              variants={itemVariants}
-              className="text-[clamp(2.2rem,6.5vw,4.5rem)] font-black tracking-tighter text-text leading-[1.08] mb-6 max-w-2xl"
-            >
-              Md. Yasir Omar{' '}
-              <span className="block sm:inline text-transparent [-webkit-text-stroke:1.5px_var(--text)] hover:text-text transition-colors duration-300">
-                {portfolioData.profile.shortName}
-              </span>
-            </motion.h1>
-
-            {/* Tagline */}
-            <motion.p
-              variants={itemVariants}
-              className="text-base sm:text-lg md:text-xl text-text-muted leading-relaxed max-w-[60ch] mb-8 font-normal"
-            >
-              {portfolioData.profile.tagline}
-            </motion.p>
-
-            {/* Call to Actions & Social Links */}
-            <motion.div
-              variants={itemVariants}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-8 lg:mb-0"
-            >
-              <Button variant="primary" size="md" href="#projects">
-                View Projects
-                <ChevronRight className="w-4 h-4 ml-0.5" />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="md"
-                href={portfolioData.profile.resumeUrl}
-                external
-                download
-                className="font-mono"
+              <motion.p
+                variants={item}
+                className="mb-7 inline-flex max-w-full items-center gap-2.5 rounded-2xl border border-border bg-bg px-3.5 py-1.5 font-mono text-xs leading-snug text-text-muted shadow-[0_2px_0_0_var(--border)] sm:rounded-full"
               >
-                <Download className="w-4 h-4 mr-1" />
-                Download Resume
-              </Button>
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-neutral-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-text" />
+                </span>
+                <span>{statusLine}</span>
+              </motion.p>
 
-              {/* Social Icon Links */}
-              <div className="flex items-center gap-2 pl-2">
-                {portfolioData.profile.socials.map((social) => {
-                  const Icon =
-                    social.label === 'GitHub' ? FaGithub : FaLinkedin;
-                  return (
-                    <a
-                      key={social.label}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${portfolioData.profile.shortName}'s ${social.label} (opens in a new tab)`}
-                      className="p-2.5 rounded-lg border border-border bg-surface text-text-muted hover:text-text hover:border-text focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-text transition-all duration-200"
-                    >
-                      <Icon className="w-4 h-4" />
-                    </a>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </motion.div>
+              <motion.h1 variants={item} className="font-black tracking-[-0.045em] text-text">
+                {lead && (
+                  <span className="block text-[clamp(2.1rem,5.2vw,4.25rem)] leading-[0.98]">{lead}</span>
+                )}
+                <span
+                  className="exploded-type block pb-[0.06em] text-[clamp(4.5rem,15vw,10.25rem)] leading-[0.86]"
+                  data-text={surname}
+                >
+                  {surname}
+                </span>
+              </motion.h1>
 
-          {/* Right Column: 3D Visual & Floating Code Window */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
-            {/* 3D Canvas Container */}
-            <div className="relative w-[280px] h-[280px] sm:w-[340px] sm:h-[340px] lg:w-[480px] lg:h-[480px] xl:w-[520px] xl:h-[520px]">
-              <TechCoreCanvas className="w-full h-full" />
-
-              {/* Overlapping Floating Code-Window Card (Desktop Only) */}
-              <div
-                className="hidden lg:block absolute -bottom-2 -left-8 z-20 w-80 rounded-xl border border-border bg-white dark:bg-neutral-900 p-4 shadow-2xl select-none transition-transform hover:-translate-y-1 duration-300"
-                aria-hidden="true"
+              <motion.p
+                variants={item}
+                className="mt-7 max-w-[54ch] text-base leading-relaxed text-text-muted sm:text-lg md:text-xl"
               >
-                {/* Window Title Bar */}
-                <div className="flex items-center gap-1.5 pb-3 mb-3 border-b border-border">
-                  <div className="w-2.5 h-2.5 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-neutral-300 dark:bg-neutral-700" />
-                  <span className="ml-2 font-mono text-[10px] text-neutral-500 dark:text-neutral-400 tracking-tight font-medium">
-                    engineer.js
-                  </span>
+                {profile.tagline}
+              </motion.p>
+
+              <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-3.5 sm:gap-4">
+                <Button variant="primary" size="md" href="#projects">
+                  View Projects
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="md"
+                  href={profile.resumeUrl}
+                  external
+                  download
+                  className="font-mono"
+                >
+                  <Download className="h-4 w-4" aria-hidden="true" />
+                  Download Resume
+                </Button>
+
+                <div className="flex items-center gap-2.5">
+                  {profile.socials.map((social) => {
+                    const Icon = SOCIAL_ICONS[social.label];
+                    if (!Icon) return null;
+                    return (
+                      <a
+                        key={social.label}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`${profile.shortName}'s ${social.label} (opens in a new tab)`}
+                        className="key key--outline key--icon"
+                      >
+                        <Icon className="h-4 w-4" aria-hidden="true" />
+                      </a>
+                    );
+                  })}
                 </div>
-
-                {/* Short JS Snippet built strictly from portfolio data */}
-                <pre className="font-mono text-xs leading-relaxed text-neutral-900 dark:text-neutral-100">
-                  <code>
-                    <span className="text-neutral-500 dark:text-neutral-400">const</span>{' '}
-                    <span className="font-bold text-neutral-900 dark:text-neutral-100">engineer</span> = {'{'}{'\n'}
-                    {'  '}<span className="text-neutral-600 dark:text-neutral-400">name:</span>{' '}
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.profile.shortName}"</span>,{'\n'}
-                    {'  '}<span className="text-neutral-600 dark:text-neutral-400">role:</span>{' '}
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.profile.role}"</span>,{'\n'}
-                    {'  '}<span className="text-neutral-600 dark:text-neutral-400">stack:</span> [
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.skills[0]?.items[0]}"</span>,{' '}
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.skills[0]?.items[1]}"</span>,{' '}
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.skills[0]?.items[2]}"</span>,{' '}
-                    <span className="font-semibold text-neutral-950 dark:text-neutral-50">"{portfolioData.skills[0]?.items[3]}"</span>
-                    ]{'\n'}
-                    {'}'};
-                  </code>
-                </pre>
-              </div>
-            </div>
-
-            {/* Interactive orbit caption (Desktop only) */}
-            <p className="hidden lg:block font-mono text-[11px] text-text-muted mt-3 tracking-wider">
-              // hover badges to inspect
-            </p>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
 
-        {/* Below the Fold: 4 Highlight Stat Cards */}
-        <div className="mt-16 md:mt-24 pt-10 border-t border-border">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {portfolioData.highlights.map((item, index) => (
-              <div
-                key={index}
-                className="p-4 sm:p-5 md:p-6 rounded-2xl border border-border bg-surface transition-all duration-300 hover:border-neutral-400 dark:hover:border-neutral-500 hover:-translate-y-0.5"
-              >
-                <div className="font-mono text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-text mb-1.5">
-                  {item.value}
-                </div>
-                <div className="text-xs sm:text-sm text-text-muted leading-snug font-medium">
-                  {item.label}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* 3D avatar with orbiting skills */}
+        <div className="relative mx-auto mt-4 h-[380px] w-full max-w-2xl sm:h-[460px] lg:absolute lg:inset-y-0 lg:right-0 lg:mt-0 lg:h-auto lg:w-[56%] lg:max-w-none">
+          <OrbitCanvas className="h-full w-full" eventSource={heroRef} progress={scrollYProgress} />
         </div>
+      </div>
 
-        {/* Animated Scroll Down Indicator */}
-        <div className="flex justify-center mt-12">
+      {/* Highlights */}
+      <div className="mx-auto max-w-6xl px-5 pb-10 pt-12 sm:px-6 md:px-8 lg:pt-6">
+        <ul className="grid grid-cols-2 gap-x-5 gap-y-7 lg:grid-cols-4 lg:gap-6">
+          {highlights.map((highlight, index) => (
+            <motion.li
+              key={highlight.label}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
+            >
+              <Card wrapperClassName="h-full" className="flex h-full flex-col justify-between p-4 sm:p-6">
+                <span aria-hidden="true" className="mb-5 font-mono text-[10px] text-text-muted">
+                  {String(index + 1).padStart(2, '0')} / {String(highlights.length).padStart(2, '0')}
+                </span>
+                <div>
+                  <div className="extrude font-mono text-3xl font-semibold tracking-tight text-text sm:text-4xl lg:text-5xl">
+                    {highlight.value}
+                  </div>
+                  <div className="mt-3 text-xs font-medium leading-snug text-text-muted sm:text-sm">
+                    {highlight.label}
+                  </div>
+                </div>
+              </Card>
+            </motion.li>
+          ))}
+        </ul>
+
+        <div className="mt-12 flex justify-center">
           <a
             href="#about"
-            className="flex flex-col items-center gap-1.5 font-mono text-xs text-text-muted hover:text-text transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-text rounded px-2 py-1"
+            className="flex flex-col items-center gap-2 rounded px-2 py-1 font-mono text-xs text-text-muted transition-colors hover:text-text"
             aria-label="Scroll down to About section"
           >
             <span>scroll</span>
-            <motion.div
-              animate={prefersReducedMotion ? {} : { y: [0, 4, 0] }}
+            <motion.span
+              animate={reduced ? undefined : { y: [0, 5, 0] }}
               transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
             >
-              <ArrowDown className="w-3.5 h-3.5" />
-            </motion.div>
+              <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+            </motion.span>
           </a>
         </div>
       </div>

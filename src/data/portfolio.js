@@ -17,6 +17,7 @@ const portfolioData = {
       "I build web applications with React on the frontend and Django, FastAPI, Node.js and Go on the backend, and ship them to the cloud.",
     location: null, // PLACEHOLDER: owner will add
     photo: null, // PLACEHOLDER: owner will add /public/profile.jpg
+    avatar: "/avatar/omar-avatar-3d.png", // 3D avatar cutout (transparent PNG) shown in the hero
     resumeUrl: "/Resume_Md_Yasir_Omar_Fahim.pdf",
     email: "mdyasirofficial2001@gmail.com",
     phone: "+8801639607507",
@@ -28,7 +29,7 @@ const portfolioData = {
   },
 
   about: [
-    "I'm a Software Engineer currently working remotely as a Jr. Software Engineer at All In One Tech Solutions, an Australia-based technology company, where I work on TradeFlow, a workflow automation platform for international import-export, trading and sourcing businesses.",
+    "I'm a Software Engineer currently working remotely at All In One Tech Solutions, an Australia-based technology company, where I work on TradeFlow, a workflow automation platform for international import-export, trading and sourcing businesses.",
     "My work spans ReactJS frontends integrated with Django REST and FastAPI backends, along with post-production work on AWS. Before this, I built a content management system with React, Node.js and PostgreSQL as a contract developer at Prionty Digitals.",
     "I hold a BSc in Computer Science and Engineering and enjoy competitive programming, with 350+ problems solved across online judges.",
   ],
@@ -43,7 +44,7 @@ const portfolioData = {
   experience: [
     {
       company: "AIO Tech Solutions",
-      role: "Jr. Software Engineer",
+      role: "Software Engineer",
       type: "Remote",
       location: "Bankstown, NSW, Sydney, Australia",
       start: "Nov 2024",
@@ -132,6 +133,13 @@ const portfolioData = {
       ],
     },
   ],
+
+  // Skills that orbit the avatar in the hero. Each name must also appear in
+  // `skills`, an experience `tech` list or a project `stack` (others are ignored).
+  orbit: {
+    inner: ["ReactJS", "Node.js", "Python", "Go", "PostgreSQL", "AWS"],
+    outer: ["Next.js", "FastAPI", "Express.js", "Gin", "MongoDB", "MySQL", "Docker", "Git"],
+  },
 
   competitiveProgramming: {
     summary:

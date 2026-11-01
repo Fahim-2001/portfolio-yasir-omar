@@ -37,32 +37,43 @@ export function useTheme() {
     }
   };
 
+  // Monochrome palette for the 3D scene (materials, edges, lines and lights).
   const colors = useMemo(() => {
     if (isDark) {
       return {
-        core: '#18181B',
-        edges: '#FAFAFA',
-        ringsAndLines: '#A1A1AA',
-        packetsAndPoints: '#FFFFFF',
-        ambient: '#FFFFFF',
-        ambientIntensity: 0.4,
-        keyLight: '#FFFFFF',
-        keyLightIntensity: 2.0,
-        rimLight: '#FFFFFF',
-        rimLightIntensity: 1.2,
+        plate: '#18181B',
+        edge: '#FAFAFA',
+        ring: '#71717A',
+        ringStrong: '#A1A1AA',
+        keycap: '#18181B',
+        keycapInk: '#FFFFFF',
+        keycapEdge: '#A1A1AA',
+        particle: '#A1A1AA',
+        gridCell: '#27272A',
+        gridSection: '#3F3F46',
+        halo: '#FFFFFF',
+        haloOpacity: 0.08,
+        ambientIntensity: 2.6,
+        keyLightIntensity: 2.6,
+        fillLightIntensity: 0.9,
       };
     }
     return {
-      core: '#0A0A0A',
-      edges: '#A1A1AA',
-      ringsAndLines: '#3F3F46',
-      packetsAndPoints: '#18181B',
-      ambient: '#FFFFFF',
-      ambientIntensity: 0.6,
-      keyLight: '#FFFFFF',
-      keyLightIntensity: 1.5,
-      rimLight: '#FFFFFF',
-      rimLightIntensity: 0.8,
+      plate: '#FFFFFF',
+      edge: '#0A0A0A',
+      ring: '#A1A1AA',
+      ringStrong: '#3F3F46',
+      keycap: '#FFFFFF',
+      keycapInk: '#0A0A0A',
+      keycapEdge: '#0A0A0A',
+      particle: '#3F3F46',
+      gridCell: '#E4E4E7',
+      gridSection: '#A1A1AA',
+      halo: '#0A0A0A',
+      haloOpacity: 0.16,
+      ambientIntensity: 1.7,
+      keyLightIntensity: 1.7,
+      fillLightIntensity: 0.6,
     };
   }, [isDark]);
 

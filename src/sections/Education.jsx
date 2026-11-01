@@ -11,103 +11,90 @@ export function Education() {
   const languagesList = portfolioData.languages;
 
   return (
-    <Section id="education" className="py-20 md:py-28">
-      <Reveal>
-        <SectionHeading
-          eyebrow="06 / Education"
-          title="Education"
-          subtitle="Academic background, coursework, and languages"
-        />
-      </Reveal>
+    <Section id="education">
+      <SectionHeading
+        eyebrow="06 / Education"
+        title="Education"
+        subtitle="Academic background, coursework, and languages"
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-5xl mx-auto items-start">
-        {/* Main Education Card (8 cols on desktop) */}
-        <Reveal delay={0.1} className="lg:col-span-8 space-y-6">
-          {educationList.map((edu, idx) => (
-            <Card key={idx} className="p-8 sm:p-10">
-              <div className="flex flex-col gap-6">
-                {/* Header: Degree & Institution */}
-                <div>
-                  <span className="font-mono text-xs uppercase tracking-widest text-text-muted block mb-2">
-                    // Degree Program
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-text mb-2">
-                    {edu.degree}
-                  </h3>
-                  <p className="text-base text-text-muted leading-relaxed">
-                    {edu.institution}
-                  </p>
-                </div>
-
-                {/* Tags row: CGPA & Graduation */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                  <Tag className="text-xs px-3 py-1 font-semibold text-text border-text/30 bg-bg">
-                    CGPA {edu.cgpa}
-                  </Tag>
-                  <Tag className="text-xs px-3 py-1 font-mono text-text-muted border-border bg-bg">
-                    Graduated {edu.graduation}
-                  </Tag>
-                </div>
-
-                {/* Coursework list */}
-                <div className="pt-6 border-t border-border/70">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs uppercase tracking-wider text-text-muted">
-                      // Key Coursework
-                    </span>
-                    <span className="font-mono text-[11px] text-text-muted">
-                      {edu.courses.length} courses
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
-                    {edu.courses.map((course) => (
-                      <div
-                        key={course}
-                        className="flex items-start gap-2 text-xs sm:text-sm font-mono text-text/90 group"
-                      >
-                        <span className="text-text-muted select-none group-hover:text-text transition-colors">
-                          —
-                        </span>
-                        <span className="leading-snug">{course}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </Reveal>
-
-        {/* Languages Card (4 cols on desktop) */}
-        <Reveal delay={0.2} className="lg:col-span-4">
-          <Card className="p-6 sm:p-8">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/70">
-              <div>
-                <span className="font-mono text-xs uppercase tracking-widest text-text-muted block mb-1">
-                  // Communication
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-8 lg:grid-cols-12">
+        <div className="space-y-8 lg:col-span-8">
+          {educationList.map((edu) => (
+            <Reveal key={edu.degree} variant="depth">
+              <Card tilt maxTilt={3} layers={2} className="p-7 sm:p-10">
+                <span className="mb-3 block font-mono text-xs uppercase tracking-[0.2em] text-text-muted">
+                  // Degree Program
                 </span>
-                <h3 className="text-lg font-bold text-text tracking-tight">
-                  Languages
+                <h3 className="mb-2 text-2xl font-black leading-tight tracking-[-0.03em] text-text sm:text-3xl">
+                  {edu.degree}
                 </h3>
-              </div>
+                <p className="text-base leading-relaxed text-text-muted">{edu.institution}</p>
+
+                {/* Spec row */}
+                <dl className="mt-8 grid grid-cols-2 border-y border-border">
+                  <div className="border-r border-border py-5 pr-5">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-muted">CGPA</dt>
+                    <dd className="extrude mt-2 font-mono text-4xl font-semibold tracking-tight text-text sm:text-5xl">
+                      {edu.cgpa}
+                    </dd>
+                  </div>
+                  <div className="py-5 pl-5">
+                    <dt className="font-mono text-[11px] uppercase tracking-[0.2em] text-text-muted">Graduated</dt>
+                    <dd className="mt-3 text-lg font-semibold tracking-tight text-text sm:text-xl">{edu.graduation}</dd>
+                  </div>
+                </dl>
+
+                <div className="pt-7">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="font-mono text-xs uppercase tracking-[0.2em] text-text-muted">// Key Coursework</span>
+                    <span className="font-mono text-[11px] text-text-muted">{edu.courses.length} courses</span>
+                  </div>
+
+                  <ol className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+                    {edu.courses.map((course, i) => (
+                      <li
+                        key={course}
+                        className="group flex items-baseline gap-3 border-b border-border py-2.5 text-sm text-text"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="shrink-0 font-mono text-[11px] text-text-muted transition-colors group-hover:text-text"
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span className="leading-snug transition-transform duration-300 group-hover:translate-x-1">
+                          {course}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </Card>
+            </Reveal>
+          ))}
+        </div>
+
+        <Reveal variant="depth" delay={0.12} className="lg:col-span-4">
+          <Card className="p-6 sm:p-8">
+            <div className="mb-6 border-b border-border pb-4">
+              <span className="mb-1 block font-mono text-xs uppercase tracking-[0.2em] text-text-muted">
+                // Communication
+              </span>
+              <h3 className="text-lg font-bold tracking-tight text-text">Languages</h3>
             </div>
 
-            <div className="space-y-4">
+            <ul className="space-y-3">
               {languagesList.map((lang) => (
-                <div
+                <li
                   key={lang.name}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-border/70 bg-bg/50"
+                  className="flex items-center justify-between rounded-xl border border-border bg-bg p-3.5 shadow-[0_3px_0_0_var(--border)]"
                 >
-                  <span className="font-medium text-sm text-text">
-                    {lang.name}
-                  </span>
-                  <Tag className="text-[11px] font-mono px-2.5 py-0.5 text-text border-border bg-surface">
-                    {lang.level}
-                  </Tag>
-                </div>
+                  <span className="text-sm font-medium text-text">{lang.name}</span>
+                  <Tag strong>{lang.level}</Tag>
+                </li>
               ))}
-            </div>
+            </ul>
           </Card>
         </Reveal>
       </div>

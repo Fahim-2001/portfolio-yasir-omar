@@ -1,3 +1,2 @@
-export { default as TechCore } from './TechCore';
-export { default as TechCoreCanvas } from './TechCoreCanvas';
-export { default as TechCoreFallback } from './TechCoreFallback';
+export { default as OrbitCanvas } from './OrbitCanvas';
+export { default as OrbitFallback } from './OrbitFallback';

@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MotionConfig } from 'motion/react';
 import { Layout } from './layout/Layout';
 import { Hero } from './sections/Hero';
 
@@ -56,19 +57,22 @@ function HomePage() {
 
 export function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route
-          path="*"
-          element={
-            <Suspense fallback={<SectionPlaceholder minHeight="min-h-screen" />}>
-              <NotFound />
-            </Suspense>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    // Reduced-motion users keep fades but lose every transform animation, app-wide.
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route
+            path="*"
+            element={
+              <Suspense fallback={<SectionPlaceholder minHeight="min-h-screen" />}>
+                <NotFound />
+              </Suspense>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </MotionConfig>
   );
 }
 
