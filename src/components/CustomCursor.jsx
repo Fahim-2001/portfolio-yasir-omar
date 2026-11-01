@@ -1,126 +1,114 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import { useCursor } from '../context/CursorContext';
+import { useFinePointer, usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
+const INTERACTIVE = 'a, button, [role="button"], input, textarea, select, label, summary';
+const SPRING = { damping: 30, stiffness: 380, mass: 0.45 };
+const pad = (n) => String(Math.max(0, Math.round(n))).padStart(4, '0');
+
+/**
+ * CAD-style reticle that trails the native cursor with a live x/y readout.
+ * The native cursor stays visible; this is an accent, never a replacement.
+ * Mouse and trackpad only, and off for reduced-motion users.
+ */
 export function CustomCursor() {
   const { cursorType, cursorText } = useCursor();
-  const [isVisible, setIsVisible] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [isInteractive, setIsInteractive] = useState(false);
-  const [isOverCanvas, setIsOverCanvas] = useState(false);
-  const isDraggingCanvasRef = useRef(false);
-  const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
+  const fine = useFinePointer();
+  const reduced = usePrefersReducedMotion();
+  const enabled = fine && !reduced;
 
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
+  const [visible, setVisible] = useState(false);
+  const [interactive, setInteractive] = useState(false);
+  const readout = useRef(null);
 
-  // Smooth cursor follow with spring physics
-  const springConfig = { damping: 28, stiffness: 350, mass: 0.5 };
-  const smoothX = useSpring(mouseX, springConfig);
-  const smoothY = useSpring(mouseY, springConfig);
+  const x = useMotionValue(-200);
+  const y = useMotionValue(-200);
+  const sx = useSpring(x, SPRING);
+  const sy = useSpring(y, SPRING);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!enabled) return undefined;
+    let frame = 0;
+    let lastX = 0;
+    let lastY = 0;
 
-    const finePointer = window.matchMedia('(pointer: fine)');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    const updateEnabled = () => {
-      setIsEnabled(finePointer.matches && !reducedMotion.matches);
-    };
-
-    updateEnabled();
-    finePointer.addEventListener('change', updateEnabled);
-    reducedMotion.addEventListener('change', updateEnabled);
-
-    const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
-
-      // Check if hovering interactive elements (links, buttons, controls)
-      const target = e.target;
-      const interactiveEl = target?.closest(
-        'a, button, [role="button"], input, textarea, select, label, summary, [tabindex="0"]'
-      );
-      setIsInteractive(Boolean(interactiveEl));
-
-      // Check if hovering over 3D canvas
-      const canvasEl = target?.closest('canvas');
-      setIsOverCanvas(Boolean(canvasEl));
-    };
-
-    const handleMouseDown = (e) => {
-      if (e.target?.closest('canvas')) {
-        isDraggingCanvasRef.current = true;
-        setIsDraggingCanvas(true);
+    const onMove = (event) => {
+      if (event.pointerType === 'touch') return;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      x.set(lastX);
+      y.set(lastY);
+      setVisible(true);
+      const target = event.target instanceof Element ? event.target.closest(INTERACTIVE) : null;
+      setInteractive(Boolean(target));
+      if (!frame) {
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          if (readout.current) readout.current.textContent = `x ${pad(lastX)}  y ${pad(lastY)}`;
+        });
       }
     };
+    const onLeave = () => setVisible(false);
 
-    const handleMouseUp = () => {
-      if (isDraggingCanvasRef.current) {
-        isDraggingCanvasRef.current = false;
-        setIsDraggingCanvas(false);
-      }
-    };
-
-    const handleMouseLeave = () => {
-      setIsVisible(false);
-      setIsInteractive(false);
-      setIsOverCanvas(false);
-      setIsDraggingCanvas(false);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    window.addEventListener('mousedown', handleMouseDown, { passive: true });
-    window.addEventListener('mouseup', handleMouseUp, { passive: true });
-    document.addEventListener('mouseleave', handleMouseLeave);
-
+    window.addEventListener('pointermove', onMove, { passive: true });
+    document.documentElement.addEventListener('pointerleave', onLeave);
     return () => {
-      finePointer.removeEventListener('change', updateEnabled);
-      reducedMotion.removeEventListener('change', updateEnabled);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
-      document.removeEventListener('mouseleave', handleMouseLeave);
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener('pointermove', onMove);
+      document.documentElement.removeEventListener('pointerleave', onLeave);
     };
-  }, [mouseX, mouseY, isVisible]);
+  }, [enabled, x, y]);
 
-  if (!isEnabled || !isVisible) return null;
+  if (!enabled) return null;
 
   const isView = cursorType === 'view';
-  const shouldHide = isOverCanvas || isDraggingCanvas;
-
-  let cursorSize = 12;
-  if (isView) {
-    cursorSize = 80;
-  } else if (isInteractive) {
-    cursorSize = 40;
-  }
+  const ring = interactive ? 46 : 26;
 
   return (
-    <motion.div
-      className="pointer-events-none fixed top-0 left-0 z-50 flex items-center justify-center rounded-full mix-blend-difference"
-      style={{
-        x: smoothX,
-        y: smoothY,
-        translateX: '-50%',
-        translateY: '-50%',
-      }}
-      animate={{
-        width: cursorSize,
-        height: cursorSize,
-        opacity: shouldHide ? 0 : 1,
-        backgroundColor: '#FFFFFF',
-      }}
-      transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-    >
-      {isView && !shouldHide && (
-        <span className="font-mono text-[11px] font-bold text-black tracking-tight select-none">
-          {cursorText || 'View ↗'}
-        </span>
+    <>
+      {/* Reticle: inverts whatever is beneath it, so it reads on both themes */}
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none fixed left-0 top-0 z-[60] mix-blend-difference"
+        style={{ x: sx, y: sy, opacity: visible && !isView ? 1 : 0, transition: 'opacity 0.25s ease' }}
+      >
+        <motion.div
+          className="relative -translate-x-1/2 -translate-y-1/2 rounded-full border border-white"
+          initial={false}
+          animate={{ width: ring, height: ring }}
+          transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+        >
+          <span className="absolute -top-1.5 left-1/2 h-1.5 w-px -translate-x-1/2 bg-white" />
+          <span className="absolute -bottom-1.5 left-1/2 h-1.5 w-px -translate-x-1/2 bg-white" />
+          <span className="absolute -left-1.5 top-1/2 h-px w-1.5 -translate-y-1/2 bg-white" />
+          <span className="absolute -right-1.5 top-1/2 h-px w-1.5 -translate-y-1/2 bg-white" />
+        </motion.div>
+        <span
+          ref={readout}
+          className="absolute left-5 top-4 whitespace-pre font-mono text-[10px] tracking-tight text-white"
+          style={{ opacity: interactive ? 0 : 0.85, transition: 'opacity 0.2s ease' }}
+        />
+      </motion.div>
+
+      {/* "View" bubble over project previews */}
+      {isView && visible && (
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none fixed left-0 top-0 z-[60]"
+          style={{ x: sx, y: sy }}
+        >
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+            className="flex h-[88px] w-[88px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-text font-mono text-[11px] font-semibold text-bg"
+          >
+            {cursorText || 'View ↗'}
+          </motion.div>
+        </motion.div>
       )}
-    </motion.div>
+    </>
   );
 }
 

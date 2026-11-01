@@ -1,15 +1,12 @@
 import React from 'react';
 
-export function Tag({
-  children,
-  className = '',
-}) {
+/** Low-profile keycap chip for metadata and tech stacks. */
+export function Tag({ children, className = '', size = 'md', strong = false, icon: Icon, as: Element = 'span' }) {
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono border border-border bg-surface text-text-muted transition-colors select-none ${className}`}
-    >
+    <Element className={`tag ${size === 'lg' ? 'tag--lg' : ''} ${strong ? 'tag--strong' : ''} ${className}`}>
+      {Icon && <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />}
       {children}
-    </span>
+    </Element>
   );
 }
 

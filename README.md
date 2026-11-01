@@ -1,6 +1,8 @@
 # Md. Yasir Omar Fahim — Software Engineer Portfolio
 
-A modern, minimal, editorial personal portfolio website engineered for **Md. Yasir Omar Fahim**, Software Engineer. Built with **React 19**, **Vite**, **Tailwind CSS**, **Motion**, and an interactive monochrome **Three.js** 3D core.
+A modern, minimal, editorial personal portfolio website engineered for **Md. Yasir Omar Fahim**, Software Engineer. Built with **React 19**, **Vite**, **Tailwind CSS**, **Motion**, and an interactive monochrome **Three.js** hero: a 3D avatar with the skill stack orbiting as keycaps.
+
+The design system ("Exploded View") is documented in **[`DESIGN.md`](DESIGN.md)**.
 
 Strictly adheres to a monochrome design system (whites, greys, and blacks only) with full dark mode support, fluid typography, WCAG AA contrast compliance, keyboard accessibility, and a single source of truth for all content.
 
@@ -14,7 +16,7 @@ Strictly adheres to a monochrome design system (whites, greys, and blacks only) 
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/vite`) | Semantic CSS tokens and modern utility classes |
 | **Routing** | [React Router v7](https://reactrouter.com/) | Client-side SPA routing with custom 404 fallback |
 | **Animations** | [Motion](https://motion.dev/) (`motion/react`) | Scroll-driven reveals, horizontal pinned track, smooth springs |
-| **3D Graphics** | [Three.js](https://threejs.org/) + Fiber + Drei | Procedural interactive icosahedron tech core and particle orbits |
+| **3D Graphics** | [Three.js](https://threejs.org/) + Fiber + Drei | 3D avatar on an exploded pedestal with two orbits of brand-colored skill keycaps |
 | **Icons** | [Lucide React](https://lucide.dev/) + [React Icons](https://react-icons.github.io/react-icons/) | Minimal UI glyphs, SimpleIcons for dev tools, Fa6 for brands |
 | **Typography** | `@fontsource/inter` & `@fontsource/jetbrains-mono` | Editorial sans-serif paired with technical monospace accents |
 
@@ -80,6 +82,7 @@ const portfolioData = {
     tagline: "I build web applications...",
     location: null,                       // e.g., "Dhaka, Bangladesh"
     photo: null,                          // e.g., "/profile.jpg"
+    avatar: "/avatar/omar-avatar-3d.png", // 3D avatar cutout shown in the hero
     resumeUrl: "/Resume_Md_Yasir_Omar_Fahim.pdf",
     email: "mdyasirofficial2001@gmail.com",
     phone: "+8801639607507",
@@ -95,6 +98,7 @@ const portfolioData = {
   experience: [ ... ],                    // Timeline jobs with company, dates, bullets, tech
   projects: [ ... ],                      // Featured project cards with stack and bullets
   skills: [ ... ],                        // Technical groups (Languages, Tools, Cloud, etc.)
+  orbit: { inner: [ ... ], outer: [ ... ] }, // Skills orbiting the hero avatar (names from skills/tech)
   competitiveProgramming: { ... },        // Problem solving summary and platform ratings
   education: [ ... ],                     // Degree, institution, CGPA, graduation, courses
   languages: [ ... ],                     // Languages with proficiency level
@@ -200,7 +204,7 @@ This automatically handles SPA routing and 404 pages out of the box. Set your bu
 
 ## 🎨 Design Principles & Quality Bar
 
-- **Strictly Monochrome**: No saturated colors or accent hues anywhere. Every element uses neutral semantic tokens (`--bg`, `--surface`, `--border`, `--text`, `--text-muted`, `--accent`).
+- **Strictly Monochrome**: No saturated colors or accent hues anywhere. Every element uses neutral semantic tokens (`--bg`, `--surface`, `--border`, `--text`, `--text-muted`, `--accent`). Approved exceptions: project screenshots, the hero avatar and the orbiting skill glyphs are shown in color. Full specification in [`DESIGN.md`](DESIGN.md).
 - **Editorial Typography**: Large, confident typography balanced with generous whitespace.
 - **Accessible (WCAG AA)**: Fully keyboard navigable, visible focus rings, aria labels on all interactive items, and contrast ratios exceeding 7.5:1 in both light and dark themes.
 - **Reduced Motion**: All animations (Motion springs, counters, and Three.js 3D canvas) respect `prefers-reduced-motion: reduce`.

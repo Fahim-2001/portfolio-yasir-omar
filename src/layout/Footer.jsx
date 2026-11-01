@@ -1,49 +1,34 @@
 import React from 'react';
 import { ArrowUp } from 'lucide-react';
-import { FaGithub, FaLinkedin } from 'react-icons/fa6';
 import portfolioData from '../data/portfolio';
-
-const SOCIAL_ICONS = {
-  GitHub: FaGithub,
-  LinkedIn: FaLinkedin,
-};
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <footer className="border-t border-border bg-bg py-12 md:py-16 transition-colors">
-      <div className="max-w-6xl mx-auto px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-        {/* Profile Info */}
-        <div className="flex flex-col items-center md:items-start gap-1 text-center md:text-left">
-          <span className="font-semibold text-text text-sm">
-            {portfolioData.profile.name}
-          </span>
-          <span className="font-mono text-xs text-text-muted">
-            © {currentYear} · Designed with passion
-          </span>
+    <footer className="relative overflow-hidden border-t border-border">
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-12 sm:flex-row sm:items-center sm:px-6 md:px-8 md:py-14">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold text-text">{portfolioData.profile.name}</span>
+          <span className="font-mono text-xs text-text-muted">© {currentYear} · Designed with passion</span>
         </div>
 
-        {/* Back to top */}
-        <div>
-          <button
-            type="button"
-            onClick={scrollToTop}
-            className="group inline-flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-text focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-text rounded px-2 py-1 transition-colors cursor-pointer"
-            aria-label="Back to top of page"
-          >
-            <span>Back to top</span>
-            <ArrowUp className="w-3.5 h-3.5 transition-transform duration-200 group-hover:-translate-y-0.5" />
-          </button>
-        </div>
+        <button type="button" onClick={scrollToTop} className="key key--outline key--sm font-mono" aria-label="Back to top of page">
+          <span>Back to top</span>
+          <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
       </div>
+
+      {/* Oversized outlined wordmark, cropped by the page edge */}
+      <div
+        aria-hidden="true"
+        data-text={portfolioData.profile.shortName}
+        className="ghost-text pointer-events-none -mb-[0.2em] select-none px-3 text-center text-[clamp(6rem,27vw,23rem)] font-black leading-[0.8] tracking-[-0.06em] text-transparent [-webkit-text-stroke:1px_var(--border-strong)]"
+      />
     </footer>
   );
 }

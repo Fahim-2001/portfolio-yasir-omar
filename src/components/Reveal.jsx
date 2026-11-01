@@ -1,48 +1,60 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { motion, useInView } from 'motion/react';
+import React from 'react';
+import { motion } from 'motion/react';
 
-/**
- * Reusable scroll-reveal wrapper with gentle easing and reduced-motion fallback.
+const EASE = [0.16, 1, 0.3, 1];
+
+/*
+ * Scroll reveals. Transforms are skipped automatically for reduced-motion users by
+ * the app-level <MotionConfig reducedMotion="user">; only the fade remains.
+ *  - rise:  fades up
+ *  - depth: stands up out of the page plane
+ *  - swing: swings in around the Y axis from the left edge
  */
+const VARIANTS = {
+  rise: {
+    hidden: { opacity: 0, y: 28 },
+    shown: { opacity: 1, y: 0 },
+  },
+  depth: {
+    hidden: { opacity: 0, y: 44, rotateX: 18, scale: 0.97 },
+    shown: { opacity: 1, y: 0, rotateX: 0, scale: 1 },
+  },
+  swing: {
+    hidden: { opacity: 0, x: -28, rotateY: 14 },
+    shown: { opacity: 1, x: 0, rotateY: 0 },
+  },
+};
+
+const ORIGINS = {
+  rise: undefined,
+  depth: '50% 100%',
+  swing: '0% 50%',
+};
+
 export function Reveal({
   children,
   delay = 0,
-  duration = 0.5,
-  y = 24,
+  duration = 0.8,
+  variant = 'rise',
   className = '',
+  as = 'div',
+  amount = 0.15,
 }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
-  if (prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
-  }
+  const Component = motion[as] ?? motion.div;
+  const origin = ORIGINS[variant];
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      transition={{
-        duration,
-        delay,
-        ease: [0.21, 0.47, 0.32, 0.98],
-      }}
+    <Component
       className={className}
+      initial="hidden"
+      whileInView="shown"
+      viewport={{ once: true, amount }}
+      variants={VARIANTS[variant] ?? VARIANTS.rise}
+      transition={{ duration, delay, ease: EASE }}
+      style={origin ? { transformPerspective: 1200, transformOrigin: origin } : undefined}
     >
       {children}
-    </motion.div>
+    </Component>
   );
 }
 

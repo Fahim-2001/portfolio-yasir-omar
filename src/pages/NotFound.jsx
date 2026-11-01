@@ -1,24 +1,26 @@
 import React from 'react';
-import { Button } from '../components/Button';
 import { ArrowLeft } from 'lucide-react';
+import { Button } from '../components/Button';
+import { PerspectiveFloor } from '../components/PerspectiveFloor';
 
 export function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-bg text-text px-6 text-center">
-      <span className="font-mono text-xs tracking-widest text-text-muted uppercase mb-4">
-        404 / Page Not Found
-      </span>
-      <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-text mb-4">
+    <main className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
+      <div aria-hidden="true" className="grain" />
+      <PerspectiveFloor className="-z-10 h-1/2" />
+
+      <span className="mb-6 font-mono text-xs uppercase tracking-[0.2em] text-text-muted">404 / Page Not Found</span>
+      <h1 className="extrude-xl mb-8 text-[clamp(6rem,24vw,13rem)] font-black leading-[0.85] tracking-[-0.06em] text-text">
         404
       </h1>
-      <p className="text-text-muted max-w-md text-base md:text-lg mb-8 leading-relaxed">
+      <p className="mb-10 max-w-md text-base leading-relaxed text-text-muted md:text-lg">
         The requested page does not exist or has been moved within this portfolio.
       </p>
       <Button variant="primary" size="md" href="/" className="font-mono">
-        <ArrowLeft className="w-4 h-4 mr-2" />
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Return to Home
       </Button>
-    </div>
+    </main>
   );
 }
 

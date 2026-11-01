@@ -4,34 +4,40 @@ import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { CursorProvider } from '../context/CursorContext';
 import { CustomCursor } from '../components/CustomCursor';
+import { DepthRail } from '../components/DepthRail';
 
 export function Layout({ children }) {
   const { scrollYProgress } = useScroll();
 
   return (
     <CursorProvider>
-      <div className="min-h-screen flex flex-col bg-bg text-text transition-colors duration-200">
-        {/* Top Reading Progress Bar */}
+      {/* Film grain sits behind all content, above the page background */}
+      <div aria-hidden="true" className="grain" />
+
+      <div className="relative flex min-h-screen flex-col text-text">
+        {/* Reading progress */}
         <motion.div
-          className="fixed top-0 left-0 right-0 h-[2px] bg-neutral-950 dark:bg-white z-50 origin-left pointer-events-none"
+          aria-hidden="true"
+          className="pointer-events-none fixed left-0 right-0 top-0 z-50 h-[2px] origin-left bg-text"
           style={{ scaleX: scrollYProgress }}
         />
         <CustomCursor />
-        {/* Accessible Skip to content */}
+
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-text focus:text-bg focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-text font-medium text-sm transition-all"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-text focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-bg"
         >
           Skip to main content
         </a>
 
         <Navbar />
 
-        <main id="main-content" className="flex-1 w-full" tabIndex={-1}>
+        <main id="main-content" className="w-full flex-1 outline-none" tabIndex={-1}>
           {children}
         </main>
 
         <Footer />
+        <DepthRail />
       </div>
     </CursorProvider>
   );
