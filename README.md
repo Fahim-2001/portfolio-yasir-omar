@@ -1,6 +1,6 @@
 # Md. Yasir Omar Fahim — Software Engineer Portfolio
 
-A modern, minimal, editorial personal portfolio website engineered for **Md. Yasir Omar Fahim**, Software Engineer. Built with **React 19**, **Vite**, **Tailwind CSS**, **Motion**, and an interactive monochrome **Three.js** hero: a 3D avatar with the skill stack orbiting as keycaps.
+A modern, minimal, editorial personal portfolio website engineered for **Md. Yasir Omar Fahim**, Software Engineer. Built with **React 19**, **Vite**, **Tailwind CSS**, **Motion**, and monochrome **Three.js**: an interactive hero (a 3D avatar with the skill stack orbiting as keycaps) and **"The Stack"**, a scroll-driven background world in which the camera spirals down an exploded software stack, one layer per section, from the cloud to silicon.
 
 The design system ("Exploded View") is documented in **[`DESIGN.md`](DESIGN.md)**.
 
@@ -16,7 +16,7 @@ Strictly adheres to a monochrome design system (whites, greys, and blacks only) 
 | **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/vite`) | Semantic CSS tokens and modern utility classes |
 | **Routing** | [React Router v7](https://reactrouter.com/) | Client-side SPA routing with custom 404 fallback |
 | **Animations** | [Motion](https://motion.dev/) (`motion/react`) | Scroll-driven reveals, horizontal pinned track, smooth springs |
-| **3D Graphics** | [Three.js](https://threejs.org/) + Fiber + Drei | 3D avatar on an exploded pedestal with two orbits of brand-colored skill keycaps |
+| **3D Graphics** | [Three.js](https://threejs.org/) + Fiber + Drei | 3D avatar on an exploded pedestal with two orbits of brand-colored skill keycaps; a fixed, scroll-driven background world ("The Stack", see `DESIGN.md` §9) |
 | **Icons** | [Lucide React](https://lucide.dev/) + [React Icons](https://react-icons.github.io/react-icons/) | Minimal UI glyphs, SimpleIcons for dev tools, Fa6 for brands |
 | **Typography** | `@fontsource/inter` & `@fontsource/jetbrains-mono` | Editorial sans-serif paired with technical monospace accents |
 
@@ -207,7 +207,7 @@ This automatically handles SPA routing and 404 pages out of the box. Set your bu
 - **Strictly Monochrome**: No saturated colors or accent hues anywhere. Every element uses neutral semantic tokens (`--bg`, `--surface`, `--border`, `--text`, `--text-muted`, `--accent`). Approved exceptions: project screenshots, the hero avatar and the orbiting skill glyphs are shown in color. Full specification in [`DESIGN.md`](DESIGN.md).
 - **Editorial Typography**: Large, confident typography balanced with generous whitespace.
 - **Accessible (WCAG AA)**: Fully keyboard navigable, visible focus rings, aria labels on all interactive items, and contrast ratios exceeding 7.5:1 in both light and dark themes.
-- **Reduced Motion**: All animations (Motion springs, counters, and Three.js 3D canvas) respect `prefers-reduced-motion: reduce`.
+- **Reduced Motion**: All animations (Motion springs, counters, and both Three.js canvases) respect `prefers-reduced-motion: reduce`. The background world stops flying and cuts between still views of each section instead.
 
 ---
 

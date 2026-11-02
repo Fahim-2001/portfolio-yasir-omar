@@ -5,13 +5,15 @@ import { Footer } from './Footer';
 import { CursorProvider } from '../context/CursorContext';
 import { CustomCursor } from '../components/CustomCursor';
 import { DepthRail } from '../components/DepthRail';
+import { WorldCanvas } from '../three/WorldCanvas';
 
 export function Layout({ children }) {
   const { scrollYProgress } = useScroll();
 
   return (
     <CursorProvider>
-      {/* Film grain sits behind all content, above the page background */}
+      {/* The background world, then film grain over it; both sit behind all content */}
+      <WorldCanvas />
       <div aria-hidden="true" className="grain" />
 
       <div className="relative flex min-h-screen flex-col text-text">

@@ -554,6 +554,38 @@ body {
     animation: floor-travel 5s linear infinite;
   }
 
+  /* ── Background world ("The Stack") ──────────────────────────────────── */
+
+  /* Fixed behind everything, under the grain. CameraRig drives the opacity of the
+     canvas wrapper inside it (fade-in and dimming behind text). */
+  .world-layer {
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    contain: strict;
+  }
+
+  /* Readability first: on wide screens the world keeps its full strength in the
+     gutters and stays faint behind the content column. */
+  @media (min-width: 1024px) {
+    .world-layer {
+      -webkit-mask-image: linear-gradient(90deg, #000 0%, rgb(0 0 0 / 0.5) 20%, rgb(0 0 0 / 0.5) 80%, #000 100%);
+      mask-image: linear-gradient(90deg, #000 0%, rgb(0 0 0 / 0.5) 20%, rgb(0 0 0 / 0.5) 80%, #000 100%);
+    }
+  }
+
+  /* CSS textures that stand in for the world until (or unless) it renders */
+  .world-fallback {
+    transition: opacity 0.9s var(--ease-out-expo), visibility 0s linear 0s;
+  }
+
+  html.world-on .world-fallback {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.9s var(--ease-out-expo), visibility 0s linear 0.9s;
+  }
+
   /* ── 3D scene label (rendered by drei <Html>) ────────────────────────── */
 
   .scene-chip {

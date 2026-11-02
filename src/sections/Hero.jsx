@@ -86,7 +86,7 @@ export function Hero() {
 
   return (
     <section id="hero" ref={heroRef} className="relative isolate overflow-hidden">
-      {/* Drafting-paper dot grid */}
+      {/* Drafting-paper dot grid (the background world begins at About) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 bg-dot-grid [mask-image:radial-gradient(ellipse_80%_70%_at_45%_35%,#000_25%,transparent_100%)]"

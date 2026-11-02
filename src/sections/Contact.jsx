@@ -88,7 +88,8 @@ export function Contact() {
 
   return (
     <Section id="contact" className="isolate overflow-hidden pb-40 md:pb-56 lg:pb-56">
-      <PerspectiveFloor className="-z-10 h-[46%]" />
+      {/* Stands in for the background world's network floor until it renders */}
+      <PerspectiveFloor className="world-fallback -z-10 h-[46%]" />
 
       <SectionHeading
         eyebrow="07 / Contact"

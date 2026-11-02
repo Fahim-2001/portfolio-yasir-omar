@@ -1,41 +1,12 @@
-import React, { Component, lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import OrbitFallback from './OrbitFallback';
+import { CanvasBoundary } from './CanvasBoundary';
+import { supportsWebGL } from './webgl';
 import portfolioData from '../data/portfolio';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
 // Three.js lives in its own lazy chunk so the hero text paints first.
 const OrbitCanvasInner = lazy(() => import('./OrbitCanvasInner'));
-
-function supportsWebGL() {
-  if (typeof window === 'undefined') return false;
-  try {
-    const canvas = document.createElement('canvas');
-    return Boolean(
-      window.WebGLRenderingContext &&
-        (canvas.getContext('webgl2') || canvas.getContext('webgl'))
-    );
-  } catch {
-    return false;
-  }
-}
-
-// If WebGL fails at runtime the line-drawing fallback simply stays on screen.
-class CanvasBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { failed: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-
-  componentDidCatch() {}
-
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
 
 const orbiting = [...(portfolioData.orbit?.inner ?? []), ...(portfolioData.orbit?.outer ?? [])];
 const DESCRIPTION = `3D illustration: ${portfolioData.profile.name}'s avatar standing on a pedestal, with skills orbiting around it${
