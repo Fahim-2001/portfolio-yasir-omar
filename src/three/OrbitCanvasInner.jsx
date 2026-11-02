@@ -1,15 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { setConsoleFunction } from 'three';
+import './consoleFilter';
 import OrbitScene from './OrbitScene';
-
-// @react-three/fiber (up to 9.8.x) constructs a THREE.Clock internally, which three
-// r183+ flags as deprecated on every canvas mount. Drop that single known message via
-// three's official logging hook and forward everything else untouched.
-setConsoleFunction((type, message, ...params) => {
-  if (type === 'warn' && typeof message === 'string' && message.startsWith('THREE.Clock:')) return;
-  (console[type] || console.log)(message, ...params);
-});
 
 /**
  * WebGL canvas for the hero. Pointer events come from `eventSource` (the hero

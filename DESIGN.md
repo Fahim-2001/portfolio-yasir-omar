@@ -17,6 +17,9 @@ they arrive, and annotations read like notes on a technical drawing.
 - **Dark theme** reads like a CAD viewport: near-black, hairline grey edges, white ink.
 - **The hero** puts the engineer at the centre of the stack: a 3D avatar on an exploded
   pedestal, with the skills he works with orbiting as physical keycaps.
+- **The background world** makes the metaphor literal: the page *is* an exploded stack.
+  Behind every section, a fixed 3D scene ("The Stack", §9) spirals the camera down
+  through one plate per section, from the cloud to silicon, as the page scrolls.
 
 ### Principles
 
@@ -189,8 +192,11 @@ Sections are numbered as depths: the heading rule ends in `z-01 … z-07`, and t
 | Line grid          | Panels, 3D floor              | 36 px hairlines / drei `<Grid>`                    |
 | Perspective floor  | Contact, 404                  | CSS plane at `rotateX(74deg)` moving toward viewer |
 
-The grain sits at `z-index: -1`, so no wrapper may paint a background over it (the layout
-wrapper is intentionally transparent; `body` carries the background).
+The grain sits at `z-index: -1` and the background world at `-2`, so no wrapper may paint
+a background over them (the layout wrapper is intentionally transparent; `body` carries
+the background). The Contact floor carries `.world-fallback`: it fades out once the world draws its first
+frame (`html.world-on`) and remains whenever the world cannot run. The hero dot grid always
+stays, because the world begins at About.
 
 ---
 
@@ -208,9 +214,9 @@ wrapper is intentionally transparent; `body` carries the background).
 `rotateX(18deg)`), `swing` (swings in around Y from the left edge). Section titles stand up from
 `rotateX(55deg)`; the section numeral swings in from `rotateY(-60deg)`.
 
-**Scroll-linked:** hero orbit widening and surname explosion; project screens rising from
-`rotateX(28deg)`; the experience rail filling; the Skills prism turning with a dwell on
-each face.
+**Scroll-linked:** the background world's camera spiralling down the stack (§9); hero
+orbit widening and surname explosion; project screens rising from `rotateX(28deg)`; the
+experience rail filling; the Skills prism turning with a dwell on each face.
 
 ### Reduced motion
 
@@ -220,6 +226,7 @@ remain), and the CSS reset collapses transitions and keyframes to 0.01 ms. In ad
 | Feature              | Reduced-motion behaviour                                      |
 | :------------------- | :------------------------------------------------------------ |
 | Hero 3D              | Renders on demand only: no orbit, intro, sway or parallax      |
+| Background world     | No flight: the camera cuts to each section's still; no ambient motion; a frame only when the section changes |
 | Pointer tilt, cursor | Disabled                                                      |
 | Skills               | Flat snap carousel instead of the pinned prism                |
 | Counters             | Final values immediately                                      |
@@ -274,11 +281,81 @@ no environment maps. All colors come from `useTheme().colors` and switch with th
   composition as an SVG line drawing (not an LCP candidate).
 - @react-three/fiber (up to 9.8.x) creates a `THREE.Clock`, which three r183+ reports as
   deprecated. That single message is filtered through three's official `setConsoleFunction`
-  hook in `OrbitCanvasInner.jsx`; everything else is forwarded.
+  hook in `consoleFilter.js` (shared by both canvases); everything else is forwarded.
 
 ---
 
-## 9. Section blueprints
+## 9. Background world: "The Stack" (`src/three/world/`)
+
+**Concept: a descent from cloud to silicon.** A fixed, full-viewport scene sits behind the
+whole page. Six plates hang on four dashed assembly rails above a drafting floor, one plate
+per section; Contact is the floor itself. Each plate carries a small diorama of what its
+section is about, and the plate labels repeat the page's own depth indices (`z-01 … z-07`).
+Scrolling spirals the camera down the stack, 60° per section, so the page reads as one
+continuous exploded view of a software system.
+
+| Section      | Layer              | Diorama (data source)                                                          |
+| :----------- | :----------------- | :----------------------------------------------------------------------------- |
+| Hero         | —                  | Not shown: the hero belongs to the avatar and its dot grid. The camera frames the whole stack here, out of sight, and the world fades in on the dive to About |
+| About        | z-01 Interface     | An exploded browser window: frame, layout, content and controls as 4 plates   |
+| Experience   | z-02 Version control | A git graph: a branch per `experience` entry, a commit per bullet, merged when the role ended; a role that runs to "Present" keeps `HEAD` |
+| Projects     | z-03 Deploy        | A container yard: a stack per `projects` entry, a container per `stack` item; settles as you arrive; gantry crane overhead |
+| Skills       | z-04 Dependencies  | A dependency graph: root → a hub per `skills` group → a leaf per skill, with packets resolving outward |
+| Achievements | z-05 Algorithms    | 14 bars bubble-sorting one swap at a time; a binary tree walked in order       |
+| Education    | z-06 Foundations   | A processor: die, cache grid and core, 40 pins, traces carrying signals        |
+| Contact      | z-07 Network       | Routes leaving the stack's footprint, packets streaming to the horizon, signal rings |
+
+Counts that come from the data are never invented: nodes, commits and containers are the
+lengths of the corresponding arrays in `portfolio.js`.
+
+**Camera.** `scrollRig.js` turns scroll into a fractional section index. A section's waypoint
+is reached when its centre meets the viewport centre or where an in-page link lands it; a
+section taller than the viewport holds its waypoint while it fills the screen, so the camera
+travels between sections and stands still while you read. `CameraRig.jsx` damps that index
+(frame-rate independent) and samples the `WAYPOINTS` table in cylindrical coordinates
+(angle, radius, height), so the path is a true spiral. Each waypoint also sets the field of
+view, fog, a lens shift (`shift`, `rise`) that composes the diorama into the empty part of
+that section's layout on wide screens, and `dim`, how far the world steps back behind text.
+
+**Readability first.** The content always wins over the scene: the world is invisible over
+the hero and fades in between the hero and About; each section dims it by 45–62 %
+(a little less in dark mode, a little more on tall screens); and on screens ≥ 1024 px a
+horizontal alpha mask keeps it at full strength only in the gutters, at half strength
+behind the content column.
+
+**Motion that explains structure.**
+
+- On arrival the plates assemble from apart while the camera dollies in from further out.
+- Scrolling fast pulls the plates apart along the rails (the gap follows scroll speed) and
+  speeds up the packets; both settle when the page stops.
+- Each diorama assembles (scales in) as the camera reaches its plate and packs away as it
+  leaves, so only the section on screen has a subject behind its text.
+- The plate under the camera takes stronger edges. Code glyphs (`{ }`, `</>`, `=>` …) drift
+  in a ring between the camera and the stack and counter-rotate with the scroll: the
+  world's foreground layer.
+- Mouse and trackpad add a slight hand-held drift.
+
+**Color.** Everything is monochrome and switches with the theme (`useTheme().colors.world`):
+light reads as drafting paper (grey hairlines, ink packets), dark as a CAD viewport (white ink
+on near-black). Fog fades to `--bg`. Materials are shared and recoloured in place.
+
+**Performance and safety.**
+
+- Its own lazy chunk (~11 kB gzipped on top of the shared three.js chunk). It mounts on the
+  visitor's first interaction (or 5 s after load), in idle time, and compiles every shader
+  before its first frame (`compileAsync` where `KHR_parallel_shader_compile` exists).
+- Demand rendering: full rate while scrolling, during the opening and while the camera
+  settles, half rate once the page is still. If frames run long the pixel ratio steps down
+  (cap 1.5, 1.25 on touch) and recovers when there is headroom. Fewer instances below 768 px.
+- Procedural geometry only (boxes, hairlines, points, canvas-drawn mono labels); no models,
+  textures or HDRs.
+- `aria-hidden`, `pointer-events: none`: it never captures scroll, touch or clicks.
+- Reduced motion: no flight, no ambient motion; the camera cuts to the section on screen.
+- No WebGL: nothing renders and the CSS fallbacks (§6) stay.
+
+---
+
+## 10. Section blueprints
 
 | Section        | Treatment                                                                                   |
 | :------------- | :------------------------------------------------------------------------------------------ |
@@ -296,7 +373,7 @@ no environment maps. All colors come from `useTheme().colors` and switch with th
 
 ---
 
-## 10. Cursor
+## 11. Cursor
 
 A CAD reticle (ring with four ticks) trails the native cursor, which stays visible, with a live
 `x 0000 y 0000` readout. It inverts what is beneath it (`mix-blend-difference` on the fixed
@@ -305,21 +382,21 @@ project screens. It is mouse and trackpad only, and off under reduced motion.
 
 ---
 
-## 11. Accessibility
+## 12. Accessibility
 
 - **Contrast:** text `19.8:1` both themes; muted text `10.4:1` (light) and `7.7:1` (dark).
   `--border-strong` and lighter tones are for lines, never for body text.
 - **Focus:** global `:focus-visible` outline, `2px solid var(--text)`, offset `3px`.
 - **Keyboard:** skip link; the mobile drawer traps focus and closes on Escape; focusing
   anything on a Skills prism face turns the prism to that face; prev/next keys.
-- **Semantics:** decorative layers are `aria-hidden`; the 3D canvas is a single `role="img"`
-  with a data-driven description; counters expose their final value to screen readers; the
+- **Semantics:** decorative layers are `aria-hidden` (the background world and its HUD
+  included); the hero 3D canvas is a single `role="img"` with a data-driven description; counters expose their final value to screen readers; the
   copy-email action announces through a polite live region.
 - **Reduced motion:** see §7.
 
 ---
 
-## 12. Content rules
+## 13. Content rules
 
 - All content comes from `src/data/portfolio.js` (`profile.avatar` and `orbit` included).
 - Never add jobs, projects, metrics, links or skills that are not in the data file.
@@ -329,7 +406,7 @@ project screens. It is mouse and trackpad only, and off under reduced motion.
 
 ---
 
-## 13. File map
+## 14. File map
 
 ```text
 src/
@@ -355,13 +432,29 @@ src/
     OrbitCanvasInner.jsx    <Canvas>, event source, offscreen pause, parallax input
     OrbitScene.jsx          avatar, pedestal, reticle, orbit rings, keycaps, floor
     OrbitFallback.jsx       SVG line drawing of the scene
+    WorldCanvas.jsx         background world: interaction/idle-loaded fixed layer, world-on flag
+    WorldCanvasInner.jsx    <Canvas>, shader warm-up, frame pacing and resolution governor
+    CanvasBoundary.jsx      error boundary shared by both canvases
+    webgl.js                cached WebGL support probe
+    consoleFilter.js        filters R3F's known THREE.Clock deprecation message
+    world/
+      waypoints.js          stack geometry, camera waypoints, layer table (no three import)
+      scrollRig.js          scroll → section index, section anchors, shared rig state
+      CameraRig.jsx         spiral camera, damping, lens shift, fog, dim, HUD readout
+      WorldScene.jsx        composition of the world
+      Tower.jsx             plates (assemble, explode, focus) and rails with packets
+      Atmosphere.jsx        drafting floor, dust, cloud, code-glyph fragments
+      materials.jsx         shared monochrome materials, recoloured per theme
+      geometry.js, parts.jsx  procedural helpers, Slab and Label parts
+      dioramas/             Interface, CommitGraph, ContainerYard, DependencyGraph,
+                            Algorithms, SiliconDie, Network
   layout/                   Layout, Navbar (dock), Footer, navLinks
   sections/                 Hero, About, Experience, Projects, Skills, Achievements, Education, Contact
 ```
 
 ---
 
-## 14. Do and don't
+## 15. Do and don't
 
 | Do                                                      | Don't                                                     |
 | :------------------------------------------------------ | :-------------------------------------------------------- |
