@@ -21,6 +21,7 @@ function Wordmark({ className = '' }) {
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const activeSection = useActiveSection();
@@ -32,9 +33,18 @@ export function Navbar() {
     setMounted(true);
   }, []);
 
-  // Raise the dock once the page scrolls
+  // Raise the dock once the page scrolls; tuck it away while scrolling down past
+  // 16px and bring it back on the way up.
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 16);
+    let lastY = window.scrollY;
+    const handleScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 16);
+      if (y < 16) setHidden(false);
+      else if (Math.abs(y - lastY) > 4) setHidden(y > lastY);
+      else return; // ignore jitter; keep lastY as the reference point
+      lastY = y;
+    };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -86,7 +96,12 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full px-3 pb-1 pt-3 sm:px-4">
+      {/* Keyboard focus inside the dock always brings it back */}
+      <header
+        className={`sticky top-0 z-40 w-full px-3 pb-1 pt-3 transition-transform duration-500 ease-[var(--ease-out-expo)] has-[:focus-visible]:translate-y-0 sm:px-4 ${
+          hidden && !mobileMenuOpen ? '-translate-y-[calc(100%+8px)]' : 'translate-y-0'
+        }`}
+      >
         <div
           className={`nav-dock mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl pl-4 pr-2 sm:pl-5 ${
             scrolled ? 'nav-dock--raised' : ''

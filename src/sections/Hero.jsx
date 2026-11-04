@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useMotionValueEvent } from 'motion/react';
 import { ArrowDown, Download, ChevronRight } from 'lucide-react';
 import { FaGithub, FaLinkedin } from 'react-icons/fa6';
@@ -7,13 +7,15 @@ import { Button } from '../components/Button';
 import { Card } from '../components/Card';
 import { OrbitCanvas } from '../three/OrbitCanvas';
 import { useFinePointer, usePrefersReducedMotion } from '../hooks/useMediaQuery';
+import { useSplashPhase } from '../hooks/useSplash';
 
 const SOCIAL_ICONS = { GitHub: FaGithub, LinkedIn: FaLinkedin };
 const EASE = [0.16, 1, 0.3, 1];
 
 const container = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.05 } },
+  // `delay`: after the splash, wait for the doors to start parting
+  visible: (delay = 0.05) => ({ transition: { staggerChildren: 0.1, delayChildren: delay } }),
 };
 
 const item = {
@@ -33,6 +35,10 @@ export function Hero() {
   const heroRef = useRef(null);
   const reduced = usePrefersReducedMotion();
   const fine = useFinePointer();
+  // Hold the entrance behind the splash; it plays as the screen splits
+  const splashPhase = useSplashPhase();
+  const ready = splashPhase !== 'intro';
+  const [afterSplash] = useState(() => splashPhase === 'intro');
   const { profile, experience, highlights } = portfolioData;
   const [lead, surname] = splitName(profile.name, profile.shortName);
 
@@ -98,8 +104,9 @@ export function Hero() {
             <motion.div
               className="relative z-10 lg:col-span-7"
               variants={container}
+              custom={afterSplash ? 0.45 : 0.05}
               initial="hidden"
-              animate="visible"
+              animate={ready ? 'visible' : 'hidden'}
             >
               <motion.p
                 variants={item}
@@ -185,9 +192,9 @@ export function Hero() {
             <motion.li
               key={highlight.label}
               initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              whileInView={ready ? { opacity: 1, y: 0 } : undefined}
               viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
+              transition={{ duration: 0.7, delay: (afterSplash ? 0.7 : 0) + index * 0.08, ease: EASE }}
             >
               <Card wrapperClassName="h-full" className="flex h-full flex-col justify-between p-4 sm:p-6">
                 <span aria-hidden="true" className="mb-5 font-mono text-[10px] text-text-muted">

@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import portfolioData from '../data/portfolio';
 import { BRAND_COLORS, BRAND_ICONS } from '../components/brandIcons';
 import { useTheme } from '../hooks/useTheme';
+import { useSplashPhase } from '../hooks/useSplash';
 
 /*
  * The engineer at the centre of the stack.
@@ -465,6 +466,7 @@ export default function OrbitScene({ progress, pointer, reduced = false, onFirst
   const width = useThree((s) => s.size.width);
   const compact = width < 540;
   const [hovered, setHovered] = useState(null);
+  const splashPhase = useSplashPhase();
 
   const tilt = useRef(null);
   const figure = useRef(null);
@@ -485,7 +487,8 @@ export default function OrbitScene({ progress, pointer, reduced = false, onFirst
 
     if (!reduced) {
       m.time += hovered ? 0 : dt;
-      m.intro = Math.min(1, m.intro + dt / 1.8);
+      // The keycaps wait behind the splash and fly in as it opens
+      if (splashPhase !== 'intro') m.intro = Math.min(1, m.intro + dt / 1.8);
       m.explode = progress?.get?.() ?? 0;
     }
 

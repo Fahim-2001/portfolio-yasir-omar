@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { Layout } from './layout/Layout';
 import { Hero } from './sections/Hero';
+import { SplashScreen } from './components/SplashScreen';
+import { useSplashPhase } from './hooks/useSplash';
 
 // Below-the-fold sections lazy-loaded to isolate chunks and maximize initial render speed
 const About = lazy(() => import('./sections/About'));
@@ -24,8 +26,13 @@ function SectionPlaceholder({ minHeight = 'min-h-[350px]' }) {
 }
 
 function HomePage() {
+  const splashPhase = useSplashPhase();
+
   return (
     <Layout>
+      {/* Opening sequence: once per browser session */}
+      {splashPhase !== 'done' && <SplashScreen />}
+
       {/* Above-the-fold Hero is eagerly loaded */}
       <Hero />
 
