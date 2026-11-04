@@ -29,8 +29,8 @@ const portfolioData = {
   },
 
   about: [
-    "I'm a Software Engineer currently working remotely at All In One Tech Solutions, an Australia-based technology company, where I work on TradeFlow, a workflow automation platform for international import-export, trading and sourcing businesses.",
-    "My work spans ReactJS frontends integrated with Django REST and FastAPI backends, along with post-production work on AWS. Before this, I built a content management system with React, Node.js and PostgreSQL as a contract developer at Prionty Digitals.",
+    "A passionate software engineer who aims for consistency and quality over quantity. I build software systems that solves buiseness problems and makes the process easier.  My experience includes building enterprise level softwares like CMS, Import Export Business Management Platforms, Workflow Automation Processes, Booking and Reservation Systems and many more",
+    "Currently my work spans with ReactJS in frontend and NodeJS, Python and Golang to develop backend, along with post-production work on AWS.",
     "I hold a BSc in Computer Science and Engineering and enjoy competitive programming, with 350+ problems solved across online judges.",
   ],
 
@@ -59,7 +59,7 @@ const portfolioData = {
     {
       company: "Prionty Digitals",
       role: "Software Developer",
-      type: "Remote · Contract",
+      type: "Remote",
       location: "Banani, Dhaka, Bangladesh",
       start: "May 2024",
       end: "Oct 2024",
@@ -77,7 +77,7 @@ const portfolioData = {
     {
       title: "TradeFlow",
       role: "Frontend Developer",
-      stack: ["ReactJS", "Django"],
+      stack: ["ReactJS", "Django", "AWS"],
       summary:
         "A platform built for international import-export, trading and sourcing businesses, with Orders, Buyers, Suppliers, Products, Freights and Accounting management modules.",
       points: [
@@ -91,7 +91,7 @@ const portfolioData = {
     {
       title: "Zyxark",
       role: "Team Lead",
-      stack: ["ReactJS", "Go (Gin)", "AWS Amplify", "AWS Elastic Beanstalk"],
+      stack: ["ReactJS", "Go (Gin)", "AWS Amplify", "AWS Elastic Beanstalk", "AWS Lightsail - Postgres"],
       summary: "A luxury stays and experiences booking platform.",
       points: [
         "Led a 3-developer team, coordinating work across the React frontend and Go (Gin) backend services.",
