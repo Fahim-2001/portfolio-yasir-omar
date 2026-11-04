@@ -359,7 +359,7 @@ on near-black). Fog fades to `--bg`. Materials are shared and recoloured in plac
 
 | Section        | Treatment                                                                                   |
 | :------------- | :------------------------------------------------------------------------------------------ |
-| Navbar         | Floating dock that rises (glass and a plate edge) after scroll; active link is a keycap pill. Drawer below `lg`. |
+| Navbar         | Floating dock that rises (glass and a plate edge) after scroll; slides up out of view while scrolling down past 16 px and returns on scroll up (or keyboard focus, or while the drawer is open); active link is a keycap pill. Drawer below `lg`. |
 | Hero           | Status chip; name with the exploded surname; tagline; keycap CTAs; 3D avatar and orbits; four highlight plates with extruded values. |
 | About          | Editorial spread: lead paragraph left, supporting paragraphs and CTA right; Quick Facts as one spec row (wraps to 2 columns, then 1, on small screens). |
 | Experience     | Rail that fills on scroll with a travelling pulse; dates left; tilting plates that swing in. |
@@ -370,6 +370,34 @@ on near-black). Fog fades to `--bg`. Materials are shared and recoloured in plac
 | Contact        | Email as the headline with a terminal caret; keycap actions; channel rows; perspective floor horizon. |
 | Footer         | Name, year, back-to-top keycap; oversized outlined wordmark cropped by the page edge.       |
 | 404            | Extruded numeral on a perspective floor.                                                    |
+
+---
+
+## 10a. Splash screen and music
+
+**Splash (`SplashScreen.jsx`, phase store in `hooks/useSplash.js`).** Plays once per browser
+session (`sessionStorage['splash-seen']`), on `/` only, with the page scroll-locked underneath.
+
+| Phase    | Time        | Treatment                                                                         |
+| :------- | :---------- | :-------------------------------------------------------------------------------- |
+| Count    | 0 – 3.0 s   | Extruded mono counter `000 → 100` on drafting paper, a 1 px progress rule, `// boot sequence` / `z-00` annotations |
+| Welcome  | 3.15 – 5.6 s| "Welcome to the world of" in the hero name's type (Inter 900) assembles as exploded type: outlined layers collapse onto the solid face while the block settles from 1.16×; it sits exactly at the centre |
+| Split    | 5.6 – 6.95 s| A seam is drawn across the middle, then the top and bottom halves (one copy of the composition each, clipped) slide apart vertically, cutting the line in two, and reveal the page |
+
+- No annotations or controls on the splash; `Esc` jumps straight to the split.
+- The hero entrance and the orbit's keycap fly-in are held until the split, and the hero
+  canvas renders on demand while covered, so the splash keeps the main thread.
+- Reduced motion: no counter or split; the welcome shows, then the splash fades.
+
+**Music (`SoundToggle.jsx`).** A fixed outline keycap at the bottom right, arriving with the
+split. Off by default; nothing is downloaded until the first click. Plays
+`/music/mask-off-orchestra.mp3` (96 kbps, loudness-normalised) on loop at 60 % through a Web
+Audio gain node (iOS ignores `audio.volume`), fading in over 1.5 s and out over 0.4 s.
+It pauses while the tab is hidden and resumes on return if it was on. `aria-pressed` reports
+the state; a three-bar monochrome meter shows while it plays. While playing, hovering the key
+(or keyboard focus) slides out a volume plate to its left: a hairline range filled in ink to
+the value, a keycap thumb and a mono level readout. Changes are smoothed (`setTargetAtTime`),
+and the chosen level is what later fade-ins return to.
 
 ---
 
@@ -421,12 +449,15 @@ src/
     CustomCursor.jsx        reticle and coordinate readout
     PerspectiveFloor.jsx    CSS 3D horizon
     ThemeToggle.jsx         keycap theme switch
+    SplashScreen.jsx        once-per-session opening: counter, welcome, split
+    SoundToggle.jsx         music keycap (lazy audio, gain fades)
     brandIcons.js           skill name → monochrome brand glyph
   hooks/
     useMediaQuery.js        media queries, reduced motion, fine pointer
     usePointerTilt.js       spring tilt and edge-light coordinates
     useActiveSection.js     shared scroll-spy
     useTheme.js             theme toggle and 3D palette
+    useSplash.js            splash phase store (intro → opening → done)
   three/
     OrbitCanvas.jsx         idle-loaded wrapper, fallback cross-fade, error boundary
     OrbitCanvasInner.jsx    <Canvas>, event source, offscreen pause, parallax input

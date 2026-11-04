@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import './consoleFilter';
 import OrbitScene from './OrbitScene';
+import { useSplashPhase } from '../hooks/useSplash';
 
 /**
  * WebGL canvas for the hero. Pointer events come from `eventSource` (the hero
@@ -50,7 +51,9 @@ export default function OrbitCanvasInner({ eventSource, progress, reduced, onFir
     };
   }, [eventSource, reduced]);
 
-  const frameloop = !inView ? 'never' : reduced ? 'demand' : 'always';
+  // Behind the splash: draw once (shaders warm), then idle until the doors open
+  const covered = useSplashPhase() === 'intro';
+  const frameloop = !inView ? 'never' : reduced || covered ? 'demand' : 'always';
 
   return (
     <div ref={wrapRef} className={className} style={{ isolation: 'isolate' }}>

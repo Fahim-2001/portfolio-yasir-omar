@@ -14,7 +14,7 @@ const portfolioData = {
     shortName: "Fahim",
     role: "Software Engineer",
     tagline:
-      "I build web applications with React on the frontend and Django, FastAPI, Node.js and Go on the backend, and ship them to the cloud.",
+      "I don't build softwares. I build relationships with stakeholders, users and customers so that together we can figure out what to solve by building systems.",
     location: null, // PLACEHOLDER: owner will add
     photo: null, // PLACEHOLDER: owner will add /public/profile.jpg
     avatar: "/avatar/omar-avatar-3d.png", // 3D avatar cutout (transparent PNG) shown in the hero
@@ -98,7 +98,7 @@ const portfolioData = {
         "Architected booking, search and reservation flows through RESTful Go APIs, designed for reliability and scalability under concurrent booking requests.",
         "Manage cloud services through AWS Amplify and Elastic Beanstalk with a CI/CD workflow.",
       ],
-      liveUrl: "https://zyxark.com/", 
+      liveUrl: "https://zyxark.com/",
       image: "/Zyxark.png",
     },
   ],

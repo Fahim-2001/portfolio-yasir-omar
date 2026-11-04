@@ -6,9 +6,12 @@ import { CursorProvider } from '../context/CursorContext';
 import { CustomCursor } from '../components/CustomCursor';
 import { DepthRail } from '../components/DepthRail';
 import { WorldCanvas } from '../three/WorldCanvas';
+import { SoundToggle } from '../components/SoundToggle';
+import { useSplashPhase } from '../hooks/useSplash';
 
 export function Layout({ children }) {
   const { scrollYProgress } = useScroll();
+  const splashPhase = useSplashPhase();
 
   return (
     <CursorProvider>
@@ -40,6 +43,18 @@ export function Layout({ children }) {
 
         <Footer />
         <DepthRail />
+
+        {/* Music toggle, off by default; it arrives once the splash opens */}
+        {splashPhase !== 'intro' && (
+          <motion.div
+            className="fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <SoundToggle />
+          </motion.div>
+        )}
       </div>
     </CursorProvider>
   );
